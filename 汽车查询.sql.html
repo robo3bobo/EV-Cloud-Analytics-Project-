@@ -1,0 +1,81 @@
+<html>
+<head>
+<title>汽车查询.sql</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #808080;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #cc7832;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+汽车查询.sql</font>
+</center></td></tr></table>
+<pre><span class="s0">-- 查询1: 各品牌电动汽车平均续航里程和电池容量排名</span>
+<span class="s2">select </span><span class="s1">make</span>
+<span class="s2">,</span><span class="s1">round(avg(Range_km)</span><span class="s2">,</span><span class="s3">1</span><span class="s1">) avg_Range_km</span>
+<span class="s2">,</span><span class="s1">round(avg(Battery_Capacity_kWh)</span><span class="s2">,</span><span class="s3">1</span><span class="s1">) avg_battery_capacity_kwh</span>
+<span class="s2">from </span><span class="s1">ev_performance</span>
+<span class="s2">group by </span><span class="s1">make</span>
+<span class="s2">order by </span><span class="s1">avg_Range_km </span><span class="s2">desc;</span>
+<span class="s0">-- 通过查询，发现.......</span>
+
+
+<span class="s0">-- 查询2: 不同车型类别(SUV, Sedan等)的能耗对比</span>
+<span class="s2">select </span><span class="s1">Vehicle_Type</span>
+<span class="s2">,</span><span class="s1">round(avg(Energy_Consumption_kWh_per_100km)</span><span class="s2">,</span><span class="s3">2</span><span class="s1">) avg_consumption</span>
+<span class="s2">from </span><span class="s1">ev_performance</span>
+<span class="s2">group by </span><span class="s1">Vehicle_Type</span>
+<span class="s2">order by </span><span class="s1">Vehicle_Type</span><span class="s2">;</span>
+<span class="s0">-- 通过查询，发现hatchback能耗最高</span>
+
+
+<span class="s0">-- 查询3: 电池健康度与行驶里程、充电周期的关系</span>
+<span class="s2">SELECT</span>
+<span class="s2">case when </span><span class="s1">Mileage_km &lt;</span><span class="s3">50000 </span><span class="s2">then </span><span class="s4">'low_Mileage'</span>
+<span class="s2">when </span><span class="s1">Mileage_km </span><span class="s2">between </span><span class="s3">50000 </span><span class="s2">and </span><span class="s3">100000 </span><span class="s2">then </span><span class="s4">'medium_Mileage'</span>
+<span class="s2">else </span><span class="s4">'high_Mileage'</span>
+<span class="s2">end as </span><span class="s1">Mileage_group</span>
+<span class="s2">,</span><span class="s1">ROUND(AVG(`Battery_Health_%`)</span><span class="s2">,</span><span class="s3">1</span><span class="s1">) avg_Battery_Health</span>
+<span class="s2">,</span><span class="s1">round(avg(Charge_Cycles)</span><span class="s2">,</span><span class="s3">0</span><span class="s1">) avg_Charge_Cycles</span>
+<span class="s2">from </span><span class="s1">ev_performance</span>
+<span class="s2">group by </span><span class="s1">Mileage_group</span>
+<span class="s2">order by </span><span class="s1">avg_Charge_Cycles</span><span class="s2">;</span>
+
+<span class="s0">-- 查询4: 各地区(Region)的环保贡献(CO2减排总量)分析</span>
+<span class="s2">SELECT </span><span class="s1">Region</span>
+<span class="s2">,</span><span class="s1">round(sum(CO2_Saved_tons)</span><span class="s2">,</span><span class="s3">0</span><span class="s1">) saved</span>
+<span class="s2">,count</span><span class="s1">(Vehicle_ID) total_vehicle</span>
+<span class="s2">from </span><span class="s1">ev_performance</span>
+<span class="s2">group by </span><span class="s1">Region</span>
+<span class="s2">order by </span><span class="s1">sum(CO2_Saved_tons) </span><span class="s2">desc;</span>
+
+<span class="s0">-- 查询5: 使用成本分析（充电成本 vs 维护成本）</span>
+<span class="s2">select </span><span class="s1">Make</span>
+<span class="s2">,</span><span class="s1">Model</span>
+<span class="s2">,</span><span class="s1">round(avg(Monthly_Charging_Cost_USD)</span><span class="s2">,</span><span class="s3">1</span><span class="s1">) a</span>
+<span class="s2">,</span><span class="s1">round(avg(Maintenance_Cost_USD)</span><span class="s2">,</span><span class="s3">2</span><span class="s1">) b</span>
+<span class="s2">,</span><span class="s1">round(avg(Monthly_Charging_Cost_USD)</span><span class="s2">,</span><span class="s3">1</span><span class="s1">)+round(avg(Maintenance_Cost_USD)</span><span class="s2">,</span><span class="s3">2</span><span class="s1">) total_cost</span>
+<span class="s2">from </span><span class="s1">ev_performance</span>
+<span class="s2">group by </span><span class="s1">Make</span><span class="s2">, </span><span class="s1">Model</span>
+<span class="s2">order by </span><span class="s1">total_cost </span><span class="s2">asc;</span>
+<span class="s0">-- 找出使用成本最少的车型</span>
+
+<span class="s0">-- 工作表4：电池性能衰减趋势分析</span>
+<span class="s2">select </span><span class="s1">floor(Charge_Cycles/</span><span class="s3">100</span><span class="s1">)*</span><span class="s3">100 </span><span class="s1">charge_cycle_group    </span><span class="s0">-- 用floor向下取整，再乘100，去除十位和个位</span>
+<span class="s2">, </span><span class="s1">CONCAT(ROUND(AVG(`Battery_Health_%`)</span><span class="s2">, </span><span class="s3">2</span><span class="s1">)</span><span class="s2">, </span><span class="s4">'%'</span><span class="s1">) avg_Battery_Health</span>
+<span class="s2">,count</span><span class="s1">(*) sample_size                       </span><span class="s0">-- 计算每个充电周期分组中有多少行数据</span>
+<span class="s2">from </span><span class="s1">ev_performance</span>
+<span class="s2">where </span><span class="s1">Charge_Cycles </span><span class="s2">is not null and </span><span class="s1">`Battery_Health_%` </span><span class="s2">is not null      </span><span class="s0">-- 去除空值</span>
+<span class="s2">group by </span><span class="s1">floor(Charge_Cycles/</span><span class="s3">100</span><span class="s1">)*</span><span class="s3">100</span>
+<span class="s2">having </span><span class="s1">sample_size&gt;</span><span class="s3">100                                           </span><span class="s0">-- 排除小样本数据，避免造成干扰</span>
+<span class="s2">order by </span><span class="s1">charge_cycle_group </span><span class="s2">desc;</span>
+
+</pre>
+</body>
+</html>
