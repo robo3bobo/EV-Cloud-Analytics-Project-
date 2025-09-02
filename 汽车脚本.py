@@ -22,7 +22,8 @@ print(f"\n重复行数量：{df.duplicated().sum()}")
 
 # 4. 创建连接云端数据库的引擎
 
-cloud_db_connection_string = "mysql+pymysql://dk:Dingkai456@rm-bp1llqgywhqx6rc9pno.mysql.rds.aliyuncs.com:3306/ev_analysis"
+cloud_db_connection_string = "mysql+pymysql://xxxxxxxxx:3306/ev_analysis"
+#此处的xxxxxxxx请替换为自己的云端数据库信息
 #这里要记得在云端建立一个名称相同的新的数据库
 
 try:
